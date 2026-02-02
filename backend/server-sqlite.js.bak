@@ -1,0 +1,117 @@
+/**
+ * Math App Server
+ * Main entry point for the Express application
+ */
+
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const { initDb } = require('./utils/db');
+const { getLocalIP } = require('./utils/helpers');
+const { SERVER_CONFIG } = require('./utils/constants');
+const logger = require('./utils/logger');
+const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
+
+// Import routes
+const authRoutes = require('./routes/auth');
+const problemRoutes = require('./routes/problems');
+const dailyChallengeRoutes = require('./routes/dailyChallenge');
+const avatarRoutes = require('./routes/avatars');
+const playerRoutes = require('./routes/players');
+const leaderboardRoutes = require('./routes/leaderboard');
+
+// Initialize Express app
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Request logging middleware
+app.use((req, res, next) => {
+  logger.http(`${req.method} ${req.path}`, {
+    ip: req.ip,
+    userAgent: req.get('user-agent')
+  });
+  next();
+});
+
+// Serve static files (frontend build)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api', problemRoutes); // Handles both /api/problem and /api/submit
+app.use('/api/daily-challenge', dailyChallengeRoutes);
+app.use('/api/avatars', avatarRoutes);
+app.use('/api/players', playerRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Serve frontend for all other routes (SPA fallback)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index.html'));
+});
+
+// Error handling middleware (must be last)
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+// Start server
+async function startServer() {
+  try {
+    // Initialize database
+    await initDb();
+
+    // Start listening
+    app.listen(SERVER_CONFIG.PORT, '0.0.0.0', () => {
+      const localIP = getLocalIP();
+      logger.info('Math App Server Running!', {
+        port: SERVER_CONFIG.PORT,
+        local: `http://localhost:${SERVER_CONFIG.PORT}`,
+        network: `http://${localIP}:${SERVER_CONFIG.PORT}`
+      });
+
+      // Also log to console for visibility
+      console.log(`
+🧮 Math App Server Running!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Local:   http://localhost:${SERVER_CONFIG.PORT}
+Network: http://${localIP}:${SERVER_CONFIG.PORT}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      `);
+    });
+  } catch (error) {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Handle uncaught exceptions (only log, don't let Winston handle it to avoid permission issues)
+process.on('uncaughtException', (error) => {
+  try {
+    logger.error('Uncaught Exception:', error);
+  } catch (logError) {
+    // Fallback to console if logger fails
+    console.error('Uncaught Exception:', error);
+  }
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  try {
+    logger.error('Unhandled Rejection at:', { promise, reason });
+  } catch (logError) {
+    // Fallback to console if logger fails
+    console.error('Unhandled Rejection:', reason);
+  }
+  process.exit(1);
+});
+
+// Start the server
+startServer();

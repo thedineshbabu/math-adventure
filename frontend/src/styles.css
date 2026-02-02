@@ -371,6 +371,8 @@ body::before {
 .auth-screen {
   text-align: center;
   padding-top: 30px;
+  position: relative;
+  z-index: 9999;
 }
 
 .auth-screen h1 {
@@ -1650,6 +1652,8 @@ body::before {
   justify-content: center;
   padding: 30px 20px;
   min-height: 150px;
+  position: relative;
+  z-index: 10000;
 }
 
 .toppers-loading .loading-spinner {
@@ -1666,6 +1670,21 @@ body::before {
   text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
   animation: float 2s infinite;
 }
+
+/* Leaderboard Loading Backdrop - Disables page interaction */
+.leaderboard-loading-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9998;
+  pointer-events: all;
+  backdrop-filter: blur(2px);
+  transition: opacity 0.3s ease;
+}
+
 
 /* Daily Challenge Mode */
 .mode-btn.daily {

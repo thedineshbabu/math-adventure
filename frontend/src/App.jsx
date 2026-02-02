@@ -1043,48 +1043,54 @@ export default function App() {
     return (
       <div className="app">
         <BackgroundDecorations />
+        {/* Loading Backdrop - Disables page interaction when loading leaderboard */}
+        {loadingToppers && <div className="leaderboard-loading-backdrop" />}
+        
         <div className="auth-screen">
           <h1>🧮 Math Adventure</h1>
           <p className="subtitle">Welcome back!</p>
 
-          <div className="login-form">
-            <div className="input-group">
-              <label>Player Name</label>
-              <input
-                type="text"
-                placeholder="Enter your player name"
-                value={loginUsername}
-                onChange={e => setLoginUsername(e.target.value)}
-                autoFocus
-              />
+          {/* Hide login form when loading leaderboard */}
+          {!loadingToppers && (
+            <div className="login-form">
+              <div className="input-group">
+                <label>Player Name</label>
+                <input
+                  type="text"
+                  placeholder="Enter your player name"
+                  value={loginUsername}
+                  onChange={e => setLoginUsername(e.target.value)}
+                  autoFocus
+                />
+              </div>
+
+              <div className="input-group">
+                <label>PIN</label>
+                <PinInput value={pin} onChange={setPin} autoFocus={false} />
+              </div>
+
+              {authError && <p className="error">{authError}</p>}
+
+              <button
+                className="btn btn-primary"
+                onClick={handleLogin}
+                disabled={!loginUsername.trim() || pin.length < 4}
+              >
+                Let's Go! 🚀
+              </button>
+
+              <div className="auth-divider">
+                <span>New here?</span>
+              </div>
+
+              <button
+                className="btn btn-secondary"
+                onClick={() => { setAuthState('register'); setAuthError(''); sound('click'); }}
+              >
+                Create New Player ➕
+              </button>
             </div>
-
-            <div className="input-group">
-              <label>PIN</label>
-              <PinInput value={pin} onChange={setPin} autoFocus={false} />
-            </div>
-
-            {authError && <p className="error">{authError}</p>}
-
-            <button
-              className="btn btn-primary"
-              onClick={handleLogin}
-              disabled={!loginUsername.trim() || pin.length < 4}
-            >
-              Let's Go! 🚀
-            </button>
-
-            <div className="auth-divider">
-              <span>New here?</span>
-            </div>
-
-            <button
-              className="btn btn-secondary"
-              onClick={() => { setAuthState('register'); setAuthError(''); sound('click'); }}
-            >
-              Create New Player ➕
-            </button>
-          </div>
+          )}
 
           {/* Toppers Showcase */}
           <div className="toppers-showcase">

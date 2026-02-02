@@ -249,6 +249,7 @@ export default function App() {
   const [pin, setPin] = useState('')
   const [authError, setAuthError] = useState('')
   const [toppers, setToppers] = useState([])
+  const [loadingToppers, setLoadingToppers] = useState(false)
 
   // Registration state
   const [newUsername, setNewUsername] = useState('')
@@ -360,10 +361,17 @@ export default function App() {
   // Fetch toppers for login/register screen
   useEffect(() => {
     if (authState === 'login' || authState === 'register') {
+      setLoadingToppers(true)
       fetch(`${API}/leaderboard?limit=3`)
         .then(res => res.json())
-        .then(data => setToppers(data))
-        .catch(() => setToppers([]))
+        .then(data => {
+          setToppers(data)
+          setLoadingToppers(false)
+        })
+        .catch(() => {
+          setToppers([])
+          setLoadingToppers(false)
+        })
     }
   }, [authState])
 
@@ -1079,9 +1087,14 @@ export default function App() {
           </div>
 
           {/* Toppers Showcase */}
-          {toppers.length > 0 && (
-            <div className="toppers-showcase">
-              <h3>🏆 Top Players</h3>
+          <div className="toppers-showcase">
+            <h3>🏆 Top Players</h3>
+            {loadingToppers ? (
+              <div className="toppers-loading">
+                <div className="loading-spinner">🧮</div>
+                <p>Loading leaderboard...</p>
+              </div>
+            ) : toppers.length > 0 ? (
               <div className="toppers-list">
                 {toppers.map((topper, index) => (
                   <div key={topper.id} className={`topper-card rank-${index + 1}`}>
@@ -1100,8 +1113,8 @@ export default function App() {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            ) : null}
+          </div>
         </div>
 
         <footer className="copyright-footer">

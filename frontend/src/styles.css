@@ -1642,6 +1642,31 @@ body::before {
   margin-top: 3px;
 }
 
+/* Toppers Loading Indicator */
+.toppers-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  min-height: 150px;
+}
+
+.toppers-loading .loading-spinner {
+  font-size: 3rem;
+  animation: bounce 0.8s infinite, wiggle 0.5s infinite;
+  filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+  margin-bottom: 15px;
+}
+
+.toppers-loading p {
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+  animation: float 2s infinite;
+}
+
 /* Daily Challenge Mode */
 .mode-btn.daily {
   background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%) !important;

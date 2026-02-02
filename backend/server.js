@@ -14,11 +14,26 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
-// Middleware
+// Middleware - CORS configuration
+const allowedOrigins = [
+  'https://math-adventure-mu.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://192.168.10.22:3000'
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
-  credentials: true
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+app.options('*', cors());
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
